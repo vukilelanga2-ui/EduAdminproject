@@ -1,0 +1,50 @@
+@{
+    ViewData["Title"] = "Admin Login";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="login-page">
+    <div class="login-bg"></div>
+    <div class="login-grid"></div>
+
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-logo-icon">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <span class="login-logo-text">EduAdmin</span>
+        </div>
+        <p class="login-subtitle">Secure Student Management Portal — Administrators only</p>
+
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-error" style="margin-bottom:20px">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                @TempData["Error"]
+            </div>
+        }
+
+        <a href="/Account/LoginWithGoogle" class="oauth-btn google">
+            <i class="fa-brands fa-google"></i>
+            Continue with Google
+        </a>
+
+        <a href="/Account/LoginWithGitHub" class="oauth-btn github">
+            <i class="fa-brands fa-github"></i>
+            Continue with GitHub
+        </a>
+
+        <div class="login-divider">or</div>
+
+        <div style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius);padding:16px;font-size:0.8rem;color:var(--text-muted);text-align:center;">
+            <i class="fa-solid fa-lock" style="color:var(--accent);margin-right:6px"></i>
+            This system is restricted to authorised administrators only.
+            Unauthorised access attempts are logged.
+        </div>
+
+        <div class="login-secure">
+            <i class="fa-solid fa-shield-halved"></i>
+            Protected by OAuth 2.0 · Secured with Azure
+        </div>
+    </div>
+</div>

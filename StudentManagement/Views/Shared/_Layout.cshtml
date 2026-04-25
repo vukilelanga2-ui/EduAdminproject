@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — EduAdmin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="app-shell">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-header">
+                    <div class="brand">
+                        <div class="brand-icon">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <div class="brand-text">
+                            <span class="brand-name">EduAdmin</span>
+                            <span class="brand-tagline">Management Portal</span>
+                        </div>
+                    </div>
+                    <button class="sidebar-toggle" id="sidebarToggle">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <div class="nav-section">
+                        <span class="nav-label">Overview</span>
+                        <a asp-controller="Home" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")">
+                            <div class="nav-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                            <span>Dashboard</span>
+                        </a>
+                    </div>
+                    <div class="nav-section">
+                        <span class="nav-label">Students</span>
+                        <a asp-controller="Students" asp-action="Index" class="nav-item @(ViewContext.RouteData.Values["controller"]?.ToString() == "Students" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                            <div class="nav-icon"><i class="fa-solid fa-users"></i></div>
+                            <span>All Students</span>
+                        </a>
+                        <a asp-controller="Students" asp-action="Create" class="nav-item @(ViewContext.RouteData.Values["action"]?.ToString() == "Create" ? "active" : "")">
+                            <div class="nav-icon"><i class="fa-solid fa-user-plus"></i></div>
+                            <span>Add Student</span>
+                        </a>
+                    </div>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="admin-card">
+                        <div class="admin-avatar">
+                            @{
+                                var adminName = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "Admin";
+                                var adminEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
+                                var adminInitial = adminName.Length > 0 ? adminName[0].ToString().ToUpper() : "A";
+                            }
+                            @adminInitial
+                        </div>
+                        <div class="admin-info">
+                            <span class="admin-name">@adminName</span>
+                            <span class="admin-role">Administrator</span>
+                        </div>
+                    </div>
+                    <form asp-controller="Account" asp-action="Logout" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="logout-btn">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </form>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <div class="topbar">
+                    <div class="topbar-left">
+                        <h1 class="page-title">@(ViewData["Title"] ?? "Dashboard")</h1>
+                    </div>
+                    <div class="topbar-right">
+                        <div class="topbar-time" id="topbarTime"></div>
+                        <div class="admin-badge">
+                            <i class="fa-solid fa-shield-halved"></i> Admin
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                @if (TempData["Success"] != null)
+                {
+                    <div class="alert alert-success">
+                        <i class="fa-solid fa-circle-check"></i>
+                        @TempData["Success"]
+                        <button class="alert-close"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-error">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        @TempData["Error"]
+                        <button class="alert-close"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                }
+
+                <div class="page-content">
+                    @RenderBody()
+                </div>
+            </main>
+        </div>
+    }
+    else
+    {
+        @RenderBody()
+    }
+
+    <!-- Confirm Modal -->
+    <div class="modal-overlay" id="confirmModal" style="display:none">
+        <div class="modal-box">
+            <div class="modal-icon" id="modalIcon">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <h3 class="modal-title" id="modalTitle">Are you sure?</h3>
+            <p class="modal-message" id="modalMessage">This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="modalCancel">Cancel</button>
+                <button class="btn btn-danger" id="modalConfirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,233 @@
+@model StudentManagement.Models.StudentListViewModel
+@{
+    ViewData["Title"] = "Students";
+}
+
+<div class="table-container">
+    <!-- Header / Filters -->
+    <div class="table-header">
+        <div>
+            <div class="table-title">Student Records</div>
+            <div class="table-count">@Model.TotalCount total students</div>
+        </div>
+
+        <div class="filters-bar">
+            <form method="get" asp-action="Index" id="filterForm" style="display:contents">
+                <div class="search-wrap">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text"
+                           name="search"
+                           value="@Model.SearchTerm"
+                           placeholder="Search name, email, ID..."
+                           class="search-input"
+                           id="liveSearchInput"
+                           autocomplete="off" />
+                </div>
+
+                <select name="status" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="">All Status</option>
+                    <option value="Active" selected="@(Model.StatusFilter == "Active")">Active</option>
+                    <option value="Inactive" selected="@(Model.StatusFilter == "Inactive")">Inactive</option>
+                    <option value="Suspended" selected="@(Model.StatusFilter == "Suspended")">Suspended</option>
+                    <option value="Graduated" selected="@(Model.StatusFilter == "Graduated")">Graduated</option>
+                </select>
+
+                <input type="hidden" name="page" value="1" />
+                <input type="hidden" name="pageSize" value="@Model.PageSize" />
+
+                <select name="pageSize" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                    <option value="10" selected="@(Model.PageSize == 10)">10 / page</option>
+                    <option value="25" selected="@(Model.PageSize == 25)">25 / page</option>
+                    <option value="50" selected="@(Model.PageSize == 50)">50 / page</option>
+                </select>
+            </form>
+
+            <a asp-action="Create" class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-plus"></i> Add Student
+            </a>
+        </div>
+    </div>
+
+    <!-- Table -->
+    @if (Model.Students.Any())
+    {
+        <div style="overflow-x:auto">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Student #</th>
+                        <th>Email</th>
+                        <th>Mobile</th>
+                        <th>Course</th>
+                        <th>Year</th>
+                        <th>GPA</th>
+                        <th>Status</th>
+                        <th style="width:120px;text-align:center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var student in Model.Students)
+                    {
+                        <tr>
+                            <td>
+                                <div class="student-cell">
+                                    @if (!string.IsNullOrEmpty(student.ProfileImageUrl))
+                                    {
+                                        <img src="@student.ProfileImageUrl" alt="@student.FullName"
+                                             class="student-avatar" style="width:38px;height:38px;object-fit:cover" />
+                                    }
+                                    else
+                                    {
+                                        <div class="student-avatar">@student.FirstName[0]</div>
+                                    }
+                                    <div>
+                                        <div class="student-name">@student.FullName</div>
+                                        <div class="student-id">Added @student.CreatedAt.ToString("dd MMM yyyy")</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="font-mono" style="font-size:0.78rem;color:var(--text-muted)">@student.StudentNumber</span></td>
+                            <td style="color:var(--text-secondary);font-size:0.82rem">@student.Email</td>
+                            <td style="color:var(--text-secondary);font-size:0.82rem">@student.MobileNumber</td>
+                            <td style="font-size:0.82rem">@student.Course</td>
+                            <td style="font-size:0.82rem;text-align:center">@student.Year</td>
+                            <td>
+                                <span style="font-family:var(--font-mono);font-size:0.8rem">@student.GPA.ToString("F2")</span>
+                            </td>
+                            <td>
+                                <span class="badge @student.StatusBadgeClass">
+                                    <i class="fa-solid fa-circle" style="font-size:6px"></i>
+                                    @student.EnrollmentStatus
+                                </span>
+                            </td>
+                            <td>
+                                <div style="display:flex;gap:6px;justify-content:center">
+                                    <!-- View -->
+                                    <a asp-action="Details" asp-route-id="@student.Id"
+                                       class="btn-icon" data-tip="View Details">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+
+                                    <!-- Edit -->
+                                    <a asp-action="Edit" asp-route-id="@student.Id"
+                                       class="btn-icon edit" data-tip="Edit">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </a>
+
+                                    <!-- Soft Delete -->
+                                    <form method="post" asp-action="SoftDelete" asp-route-id="@student.Id"
+                                          id="softForm_@student.Id">
+                                        @Html.AntiForgeryToken()
+                                        <button type="button" class="btn-icon soft"
+                                                data-soft-delete
+                                                data-student-name="@student.FullName"
+                                                data-form-id="softForm_@student.Id"
+                                                data-tip="Deactivate">
+                                            <i class="fa-solid fa-user-slash"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Hard Delete -->
+                                    <form method="post" asp-action="Delete" asp-route-id="@student.Id"
+                                          id="delForm_@student.Id">
+                                        @Html.AntiForgeryToken()
+                                        <button type="button" class="btn-icon del"
+                                                data-hard-delete
+                                                data-student-name="@student.FullName"
+                                                data-form-id="delForm_@student.Id"
+                                                data-tip="Delete Forever">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination">
+            <div class="page-info">
+                Showing @((Model.CurrentPage - 1) * Model.PageSize + 1)–@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalCount))
+                of @Model.TotalCount students
+            </div>
+            <div class="page-buttons">
+                @if (Model.HasPreviousPage)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="1"
+                       asp-route-search="@Model.SearchTerm"
+                       asp-route-status="@Model.StatusFilter"
+                       asp-route-pageSize="@Model.PageSize"
+                       class="page-btn" title="First">
+                        <i class="fa-solid fa-angles-left"></i>
+                    </a>
+                    <a asp-action="Index"
+                       asp-route-page="@(Model.CurrentPage - 1)"
+                       asp-route-search="@Model.SearchTerm"
+                       asp-route-status="@Model.StatusFilter"
+                       asp-route-pageSize="@Model.PageSize"
+                       class="page-btn">
+                        <i class="fa-solid fa-angle-left"></i>
+                    </a>
+                }
+
+                @for (int i = Math.Max(1, Model.CurrentPage - 2); i <= Math.Min(Model.TotalPages, Model.CurrentPage + 2); i++)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-search="@Model.SearchTerm"
+                       asp-route-status="@Model.StatusFilter"
+                       asp-route-pageSize="@Model.PageSize"
+                       class="page-btn @(i == Model.CurrentPage ? "active" : "")">@i</a>
+                }
+
+                @if (Model.HasNextPage)
+                {
+                    <a asp-action="Index"
+                       asp-route-page="@(Model.CurrentPage + 1)"
+                       asp-route-search="@Model.SearchTerm"
+                       asp-route-status="@Model.StatusFilter"
+                       asp-route-pageSize="@Model.PageSize"
+                       class="page-btn">
+                        <i class="fa-solid fa-angle-right"></i>
+                    </a>
+                    <a asp-action="Index"
+                       asp-route-page="@Model.TotalPages"
+                       asp-route-search="@Model.SearchTerm"
+                       asp-route-status="@Model.StatusFilter"
+                       asp-route-pageSize="@Model.PageSize"
+                       class="page-btn" title="Last">
+                        <i class="fa-solid fa-angles-right"></i>
+                    </a>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-user-graduate"></i></div>
+            <div class="empty-title">No students found</div>
+            <div class="empty-sub">
+                @if (!string.IsNullOrEmpty(Model.SearchTerm))
+                {
+                    <span>No results for "@Model.SearchTerm"</span>
+                }
+                else
+                {
+                    <span>Add your first student to get started</span>
+                }
+            </div>
+            @if (string.IsNullOrEmpty(Model.SearchTerm))
+            {
+                <a asp-action="Create" class="btn btn-primary mt-4">
+                    <i class="fa-solid fa-plus"></i> Add Student
+                </a>
+            }
+        </div>
+    }
+</div>

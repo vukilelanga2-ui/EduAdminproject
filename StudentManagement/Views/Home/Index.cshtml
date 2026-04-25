@@ -1,0 +1,169 @@
+@model StudentManagement.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<!-- Stat Cards -->
+<div class="stat-grid">
+    <div class="stat-card total">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num">@Model.TotalStudents</div>
+                <div class="stat-label">Total Students</div>
+            </div>
+            <div class="stat-icon purple">
+                <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">All enrolled records</div>
+    </div>
+
+    <div class="stat-card active">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num" style="color:var(--green)">@Model.ActiveStudents</div>
+                <div class="stat-label">Active</div>
+            </div>
+            <div class="stat-icon green">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">Currently enrolled</div>
+    </div>
+
+    <div class="stat-card inactive">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num" style="color:var(--amber)">@Model.InactiveStudents</div>
+                <div class="stat-label">Inactive</div>
+            </div>
+            <div class="stat-icon amber">
+                <i class="fa-solid fa-user-slash"></i>
+            </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">Deactivated accounts</div>
+    </div>
+
+    <div class="stat-card grad">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num" style="color:var(--blue)">@Model.GraduatedStudents</div>
+                <div class="stat-label">Graduated</div>
+            </div>
+            <div class="stat-icon blue">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">Completed programs</div>
+    </div>
+
+    <div class="stat-card" style="border-top-color:var(--purple)">
+        <div class="stat-top">
+            <div>
+                <div class="stat-num" style="color:var(--purple)">@Model.AverageGPA.ToString("F2")</div>
+                <div class="stat-label">Avg GPA</div>
+            </div>
+            <div class="stat-icon pink">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+        </div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">Institution average</div>
+    </div>
+</div>
+
+<!-- Bottom row -->
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+
+    <!-- Recent Students -->
+    <div class="table-container">
+        <div class="table-header">
+            <div>
+                <div class="table-title">Recent Students</div>
+                <div class="table-count">Last 5 added</div>
+            </div>
+            <a asp-controller="Students" asp-action="Index" class="btn btn-ghost btn-sm">
+                View All <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+        @if (Model.RecentStudents.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>GPA</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.RecentStudents)
+                    {
+                        <tr>
+                            <td>
+                                <div class="student-cell">
+                                    <div class="student-avatar">@s.FirstName[0]</div>
+                                    <div>
+                                        <div class="student-name">@s.FullName</div>
+                                        <div class="student-id">@s.StudentNumber</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="color:var(--text-secondary);font-size:0.82rem">@s.Course</td>
+                            <td>
+                                <span style="font-family:var(--font-mono);font-size:0.8rem">@s.GPA.ToString("F1")</span>
+                                <div class="gpa-bar"><div class="gpa-fill" style="width:@(s.GPA/4.0*100)%"></div></div>
+                            </td>
+                            <td>
+                                <span class="badge badge-@s.StatusBadgeClass.Replace("badge-","")">@s.EnrollmentStatus</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="empty-title">No students yet</div>
+                <div class="empty-sub">Add your first student to get started</div>
+            </div>
+        }
+    </div>
+
+    <!-- Courses breakdown -->
+    <div class="card">
+        <div class="section-title">Students by Course</div>
+        @if (Model.StudentsByCourse.Any())
+        {
+            @foreach (var course in Model.StudentsByCourse.OrderByDescending(c => c.Value).Take(8))
+            {
+                var pct = Model.TotalStudents > 0 ? (double)course.Value / Model.TotalStudents * 100 : 0;
+                <div style="margin-bottom:14px">
+                    <div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:6px">
+                        <span style="color:var(--text-secondary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">@course.Key</span>
+                        <span style="color:var(--text-muted);font-family:var(--font-mono)">@course.Value</span>
+                    </div>
+                    <div style="height:4px;background:var(--bg-overlay);border-radius:2px;overflow:hidden">
+                        <div style="height:100%;width:@pct.ToString("F0")%;background:linear-gradient(90deg,var(--accent),var(--purple));border-radius:2px;transition:width 0.6s ease"></div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div style="text-align:center;color:var(--text-muted);padding:32px 0;font-size:0.875rem">No data yet</div>
+        }
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap">
+    <a asp-controller="Students" asp-action="Create" class="btn btn-primary">
+        <i class="fa-solid fa-user-plus"></i> Add New Student
+    </a>
+    <a asp-controller="Students" asp-action="Index" class="btn btn-ghost">
+        <i class="fa-solid fa-list"></i> Manage Students
+    </a>
+</div>

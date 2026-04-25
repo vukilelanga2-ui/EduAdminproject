@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="login-page">
+    <div class="login-bg"></div>
+    <div class="login-card" style="text-align:center">
+        <div style="font-size:3rem;color:var(--red);margin-bottom:16px">
+            <i class="fa-solid fa-ban"></i>
+        </div>
+        <h2 style="font-size:1.2rem;font-weight:700;margin-bottom:8px">Access Denied</h2>
+        <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:24px">
+            Your account is not authorised to access this portal.
+            Only registered administrators can log in.
+        </p>
+        <a href="/Account/Login" class="btn btn-primary" style="display:inline-flex">
+            <i class="fa-solid fa-arrow-left"></i> Back to Login
+        </a>
+    </div>
+</div>
